@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script src="vendors/jquery/jquery.min.js"></script>
+
+<script>
+	function sendRequest() {
+		var parms = "title=" + $("#textBox").val() + "&format=JSONP";
+		
+		// Other parameters
+		//parms += "&lang=en-us&actors=S";
+		
+		$("#countries").text("");
+		$("#actors").text("");
+		
+		$.ajax({
+            data:		parms,
+            url:		'http://www.myapifilms.com/imdb',
+            type:		'get',
+            dataType:	'jsonp',
+            beforeSend: function () {},
+            success:  function (response, textStatus, jqXHR) {
+alert("successsssss");
+            	$.each(response, function(index, element){
+            		if (element.countries != undefined) {
+            			$.each(element.countries, function(index, country){
+            				$("#countries").append(country + ", ");
+            			});
+            		}
+            		if (element.actors != undefined) {
+            			$.each(element.actors, function(index, actor){
+            				$("#actors").append(actor.actorName + " - " + actor.actorId + ", ");
+            			});
+            		}
+            	});
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+alert("errrrrrr");
+            	$("#error").text(textStatus + "; " + errorThrown);
+            }
+    	});
+    	
+	}
+</script>
+<title>JQuery Example</title>
+</head>
+<body>
+	
+	Title: <input type="text" id="textBox" value="matrix" />
+	<button onclick="sendRequest();">Send</button>
+	
+	<br />
+	<div id="error"></div>
+	<br />
+	<b>Countries</b>: 
+	<div id="countries" style="margin-left: 20px;"></div>
+	<br />
+	<b>Actors</b>: 
+	<div id="actors" style="margin-left: 20px;"></div>
+
+</body>
+</html>
