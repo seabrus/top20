@@ -1,7 +1,7 @@
 var app = angular.module('testTop20', []);
 
 
-app.controller('Top20Controller', [ 'dataService', function( dataService ) {
+app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService, $sce ) {
     var self = this;
 
 // Application data loading
@@ -22,9 +22,26 @@ app.controller('Top20Controller', [ 'dataService', function( dataService ) {
     self.loadMovieStatus = 'success';
     self.moviesData = dataService.loadData();
 
+    dataService.loadTrailersData();
+
 
 // Tab selection initiation
     self.currentTab = "Top20";
+
+
+// Trailer URL preparation
+    self.trailerURL = $sce.trustAsResourceUrl( 'http://www.imdb.com/video/imdb/vi1317709849/imdb/embed?autoplay=true&width=480' );
+    self.getTrailerURL = function( videoURL ) {
+        var reg = /http\:\/\/www\.imdb\.com\/video\/imdb\/vi\d+/;
+        var url = $sce.trustAsResourceUrl( videoURL.match( reg )[0] + '/imdb/embed?autoplay=true&width=480' );
+
+alert( 'URL = ' + url )
+        return url;
+    };
+
+
+
+
 
 
 //===============================================
@@ -91,6 +108,8 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
         }
     ];
 
+    var moviesYears = [];
+
     var prepareMoviesData = function( initialData ) {
         if ( initialData ) {
             movies = [];
@@ -103,6 +122,8 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
                 movies[ i ].rating = initialData[ i ].rating || '';
                 movies[ i ].idIMDB = initialData[ i ].idIMDB || '';
                 movies[ i ].ranking = initialData[ i ].ranking || '';
+
+                moviesYears.push( parseInt( movies[ i ].year ) );
 
                 movies[ i ].genres = [];
                 for ( var k=0, len1=initialData[ i ].genres.length; k<len1; k++ ) {
@@ -124,7 +145,7 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
                 movies[ i ].trailer = {};
                 movies[ i ].trailer.qualities = [];
                 movies[ i ].trailer.videoURL = '';
-                
+
                 movies[ i ].favorite = false;
 
             }   // end of the main "for" loop
@@ -138,7 +159,6 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
        loadData: function() {
 /*
             $http.jsonp( 'http://www.myapifilms.com/imdb/top?callback=JSON_CALLBACK&format=JSONP&start=1&end=5&data=F',
-//            $http.jsonp( 'http://www.myapifilms.com/imdb?callback=JSON_CALLBACK&idIMDB=tt0111161&format=JSONP',
 //            $http.jsonp( 'http://www.myapifilms.com/imdb?callback=JSON_CALLBACK&idIMDB=tt0110912&format=JSONP',
                                 { transformResponse:    function(data, headers) {
                                         alert("Data2 = " + data.year + ' ' + data.simplePlot + ' ' + data.title );
@@ -152,12 +172,40 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
 */
 
             return prepareMoviesData( app.rawData );
-            //return movies;
         },   // end of "loadData"
 
-    };
+
+        loadTrailersData:  function() {
+            var url;
+
+            for ( var i=0, len=movies.length; i<len; i++ ) {
+                url = '';
+                (function( n ) {
+                    url = 'http://www.myapifilms.com/imdb?callback=JSON_CALLBACK&idIMDB=' + movies[ n ].idIMDB + '&trailer=1&format=JSONP';
+                    $http.jsonp( url,
+                            { transformResponse:  function( data ) {
+                                  if ( data.trailer ) {
+                                      movies[ n ].trailer.qualities = angular.copy( data.trailer.qualities ) || [];
+                                      movies[ n ].trailer.videoURL = data.trailer.videoURL || '';
+                                  }
+                                  return data;
+                              }
+                            }
+                     )
+                    .then( function(response) { return true; },
+                              function(error) { alert("Error trailer = " + error.status); return $q.reject( error ); }
+                    );
+
+                }( i ));
+            }
+
+        },   // end of "loadTrailersData"
+
+    };   // end of "return"
 
 }]);
+
+
 
 
 
@@ -168,7 +216,19 @@ app.directive('loading', [ function() {
    };
 }]);
 
-
+app.directive('modalDialog', [ function() {
+    return {
+                restrict: 'A',
+                scope: {
+                    modalDialogId: '@modalDialogId',
+                    trailerUrl: '=trailerUrl'
+                },
+                templateUrl: 'views/modal-dialog.html',
+                link: function($scope, $elem, $attrs) {
+                    //
+                }
+   };
+}]);
 
 
 

@@ -108,14 +108,14 @@
                                         <b>Genres</b>: <span ng-repeat="genre in movie.genres">{{ genre }}{{ $last ? '' : ', '}}</span><br>
                                         <b>Countries</b>: <span ng-repeat="country in movie.countries">{{ country }}{{ $last ? '' : ', '}}</span><br>
                                         <b>Directors</b>: <span ng-repeat="director in movie.directors"><a ng-href="{{ director.pageURL }}" target="_blank">{{ director.name }}</a>{{ $last ? '' : ', '}}</span><br>
-                                        <b>Trailers</b>: 
-											<span ng-repeat="qlt in movie.trailer.qualities as trailers">
-												<button type="button" class="btn btn-default"> {{ qlt.quality }} </button>&nbsp;
-	                                        </span>
-	                                        <span ng-if="trailers.length === 0 && movie.trailer.videoURL">
-												<button type="button" class="btn btn-default"> Watch </button>
-	                                        </span>
-	                                        <span ng-if="trailers.length === 0 && !movie.trailer.videoURL">not available now</span>
+                                        <b>Trailers</b>:
+                                            <span ng-repeat="qlt in movie.trailer.qualities as trailers">
+                                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-trailer" ng-click="ctrl.trailerURL = ctrl.getTrailerURL(movie.trailer.videoURL)"> {{ qlt.quality }} </button>&nbsp;
+                                            </span>
+                                            <span ng-if="trailers.length === 0 && movie.trailer.videoURL">
+                                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-trailer" ng-click="ctrl.trailerURL = ctrl.getTrailerURL(movie.trailer.videoURL)"> Watch </button>
+                                            </span>
+                                            <span ng-if="trailers.length === 0 && !movie.trailer.videoURL">not available now</span>
                                     </td>
                                     <td class="td3">My favorite<br>
                                         <input type="checkbox" ng-model="movie.favorite">
@@ -126,6 +126,8 @@
                     </div>
                 </div>
             </div>   <!--   <div class="row">   -->
+
+			<div modal-dialog modal-dialog-id="modal-trailer" trailer-url="ctrl.trailerURL"></div>
 
         </div>   <!--   <div ng-switch-when="Top20">   -->
 
