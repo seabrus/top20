@@ -1,4 +1,4 @@
-var app = angular.module('testTop20', []);
+var app = angular.module('testTop20', [ 'angularCharts' ]);
 
 
 app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService, $sce ) {
@@ -22,7 +22,7 @@ app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService
     self.loadMovieStatus = 'success';
     self.moviesData = dataService.loadData();
 
-    dataService.loadTrailersData();
+/////////////////////////    //dataService.loadTrailersData();
 
 
 // Tab selection initiation
@@ -38,10 +38,6 @@ app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService
 alert( 'URL = ' + url )
         return url;
     };
-
-
-
-
 
 
 //===============================================
@@ -230,6 +226,44 @@ app.directive('modalDialog', [ function() {
    };
 }]);
 
+
+app.controller('ChartController', [ 'dataService', function( dataService ) {
+    var self = this;
+    
+    self.chartType = 'pie';
+    
+    self.chartData = {
+		series: [ '1970-1979', '1980-1989', '1990-1999', '2000-2009' ],
+		data: [{
+			x: '1970-1979',
+			y: [4],
+			tooltip: '1970-1979'
+		}, {
+			x: '1980-1989',
+			y: [7],
+			tooltip: '1980-1989'
+		}, {
+			x: '1990-1999',
+			y: [5],
+			tooltip: '1990-1999'
+		}, {
+			x: '2000-2009',
+			y: [4],
+			tooltip: '2000-2009'
+		}]
+	};
+    
+    self.chartConfig = {
+		labels: true,
+		title: "",
+		legend: {
+			display: true,
+			position: 'left'
+		},
+		innerRadius: 50
+	};
+
+}]);
 
 
 
