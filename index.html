@@ -135,23 +135,24 @@
 <!-- TAB: Statistics -->
         <div ng-switch-when="Statistics">
           <div ng-controller="ChartController as cc">
-			  
+
             <div class="page-header">
-                <h3>Movies per years</h3>
+                <h3>Movies by Decades</h3>
             </div>
 
             <div class="row">
-              <div class="col-sm-12">
-				  
-				<select ng-model="cc.chartType" class="chart">
-					<option value="pie">pie</option>
-					<option value="bar">bar</option>
-					<option value="line">line</option>
-					<option value="point">point</option>
-					<option value="area">area</option>
-				</select>
-				  
-				  <div ac-chart="cc.chartType" ac-data="cc.chartData" ac-config="cc.chartConfig" id='chart'></div>
+              <div class="col-xs-12" style="font-size:14pt;">
+                <div>
+				 Select chart type:  
+                <select ng-model="cc.chartType" class="chart">
+                    <option value="pie">pie</option>
+                    <option value="bar">bar</option>
+                    <option value="line">line</option>
+                    <option value="point">point</option>
+                    <option value="area">area</option>
+                </select>
+                </div>
+                <div ac-chart="cc.chartType" ac-data="cc.chartData" ac-config="cc.chartConfig" id='chart'></div>
               </div>
             </div>
 
@@ -195,5 +196,6 @@
     <script src="vendors/charts/angular-charts.min.js" type="text/javascript"></script>
     <!-- ================================================== -->
     <script src="js/top20.js"></script>
+    <script src="js/raw-data.js"></script>
   </body>
 </html>
