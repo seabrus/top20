@@ -4,8 +4,12 @@ var app = angular.module('testTop20', [ 'angularCharts' ]);
 app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService, $sce ) {
     var self = this;
 
+// Loading status and Tabs initialization
+    self.loadTrailerStatus = [ -1 ];
+    self.loadMovieStatus = 'loading';   // is equal to 'loading' or 'success' or 'error'
+    self.currentTab = 'Top20';
+
 // Application data loading
-    self.loadMovieStatus = 'loading';   // 'loading' or 'success' or 'error'
     self.moviesData = [];
 /*
     dataService.loadData().then(
@@ -22,11 +26,10 @@ app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService
     self.loadMovieStatus = 'success';
     self.moviesData = dataService.loadData();
 
-/////////////////////////    //dataService.loadTrailersData();
 
+    self.loadTrailerStatus[0] = 0;
+    dataService.loadTrailersData( self.loadTrailerStatus );
 
-// Tab selection initiation
-    self.currentTab = "Top20";
 
 
 // Trailer URL preparation
@@ -34,8 +37,6 @@ app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService
     self.getTrailerURL = function( videoURL ) {
         var reg = /http\:\/\/www\.imdb\.com\/video\/imdb\/vi\d+/;
         var url = $sce.trustAsResourceUrl( videoURL.match( reg )[0] + '/imdb/embed?autoplay=true&width=480' );
-
-alert( 'URL = ' + url )
         return url;
     };
 
@@ -109,7 +110,7 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
     var moviesByDecades = {};
 
 
-  // Dat processing methods
+  // Data processing methods
     var prepareMoviesData = function( initialData ) {
         if ( initialData ) {
             movies = [];
@@ -161,6 +162,7 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
             }
         }
 
+        initialData = null;
 
         return movies;
     };
@@ -169,24 +171,19 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
     return   {
        loadData: function() {
 /*
-            $http.jsonp( 'http://www.myapifilms.com/imdb/top?callback=JSON_CALLBACK&format=JSONP&start=1&end=5&data=F',
-//            $http.jsonp( 'http://www.myapifilms.com/imdb?callback=JSON_CALLBACK&idIMDB=tt0110912&format=JSONP',
-                                { transformResponse:    function(data, headers) {
-                                        alert("Data2 = " + data.year + ' ' + data.simplePlot + ' ' + data.title );
-                                        return data;
-                                    }
-                                }
-                            )
-                            .then( function(response) { alert("URA2"); return 11; },
-                                      function(error) { alert("Error2 = " + error.status); return $q.reject( error ); }
-                            );
+            $http.jsonp( 'http://www.myapifilms.com/imdb/top?callback=JSON_CALLBACK&format=JSONP&start=1&end=5&data=F' )
+                     .then( function(response) { 
+									alert("Success TOP20");   return 11; 
+									//return prepareMoviesData( response.data );
+								},
+                                function(error) { alert("Error TOP20 = " + error.status); return $q.reject( error ); }
+                     );
 */
-
             return prepareMoviesData( app.rawData );
         },   // end of "loadData"
 
 
-        loadTrailersData:  function() {
+        loadTrailersData:  function( counter ) {
             var url;
 
             for ( var i=0, len=movies.length; i<len; i++ ) {
@@ -199,12 +196,22 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
                                       movies[ n ].trailer.qualities = angular.copy( data.trailer.qualities ) || [];
                                       movies[ n ].trailer.videoURL = data.trailer.videoURL || '';
                                   }
-                                  return data;
+                                  return {};
                               }
                             }
                      )
                     .then( function(response) { return true; },
-                              function(error) { alert("Error trailer = " + error.status); return $q.reject( error ); }
+                              function(error) {
+                                  var str = 'Error: ';
+                                  for (var key in error)  str += (key + ' = ' + error[ key ] + ', ');
+                                  alert("Trailer loading = " + str);
+                                  return $q.reject( error );
+                              }
+                    )
+                    .finally( function(){
+                            counter[0] += 100 / len;
+                            if ( counter[0] >= 100 )  counter[0] = -1;
+                        }
                     );
 
                 }( i ));
@@ -236,9 +243,28 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
 
 }]);
 
+app.controller('ChartController', [ 'dataService', function( dataService ) {
+    var self = this;
+
+    self.chartType = 'pie';
+    self.chartData = dataService.getChartData();
+    self.chartConfig = {
+        labels: true,
+        title: "",
+        legend: {
+            display: true,
+            position: 'left'
+        },
+        innerRadius: 50,
+        lineLegend: 'traditional'
+    };
+}]);
 
 
 
+// ======================================
+//     DIRECTIVES
+// ======================================
 
 app.directive('loading', [ function() {
     return {
@@ -259,25 +285,6 @@ app.directive('modalDialog', [ function() {
                     //
                 }
    };
-}]);
-
-
-app.controller('ChartController', [ 'dataService', function( dataService ) {
-    var self = this;
-
-    self.chartType = 'pie';
-    self.chartData = dataService.getChartData();
-    self.chartConfig = {
-        labels: true,
-        title: "",
-        legend: {
-            display: true,
-            position: 'left'
-        },
-        innerRadius: 50,
-        lineLegend: 'traditional'
-    };
-
 }]);
 
 
