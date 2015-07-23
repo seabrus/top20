@@ -6,7 +6,7 @@ app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService
 
 // Loading status and Tabs initialization
     self.loadTrailerStatus = [ -1 ];
-    self.loadMovieStatus = 'loading';   // is equal to 'loading' or 'success' or 'error'
+    self.loadMovieStatus = 'loading';   // can be equal to 'loading' or 'success' or 'error'
     self.currentTab = 'Top20';
 
 // Application data loading
@@ -23,64 +23,30 @@ app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService
         }
     );
 */
-    self.loadMovieStatus = 'success';
     self.moviesData = dataService.loadData();
+    self.loadMovieStatus = 'success';
 
+
+// Favorite movies
+    self.favMovies = [];
+    self.favMovies = dataService.getFavoriteMovies();
+
+
+// Loading trailers' information
     self.loadTrailerStatus[0] = 0;
     dataService.loadTrailersData( self.loadTrailerStatus );
 
-// Trailer URL preparation
+
+// Trailer URL for use in the video plugin
     self.trailerURL = '';
-    self.getTrailerURL = function( videoURL ) {
-        var reg = /http\:\/\/www\.imdb\.com\/video\/imdb\/vi\d+/;
-        var url = $sce.trustAsResourceUrl( videoURL.match(reg)[0] + '/imdb/embed?autoplay=true&width=480' );
-        return url;
-    };
 
-
-//===============================================
-//     Add / Delete
-//===============================================
-/*
-    self.addTimeSpan = function( dayName, tsFrom, tsUntil ) {
-        // Find the active day of the week
-        for ( var i=0, len1=self.regData.openingHours.length; i<len1; i++ )
-            if ( dayName === self.regData.openingHours[ i ].dayName ) break;
-
-        // Find the active time span
-        var selectedDay = self.regData.openingHours[ i ];
-        for ( var j=0, len2=selectedDay.hours.length; j<len2; j++ )
-            if ( tsFrom === selectedDay.hours[ j ].from  &&  tsUntil === selectedDay.hours[ j ].until ) break;
-
-        // Add a new time span after the active one  OR  the first one into an empty array of time spans
-        if ( j < len2  ||  len2 === 0 ) {
-            var buf = {from: '', until: ''};
-            selectedDay.hours.splice( j+1, 0, buf );
-        }
-    };
-
-    self.deleteTimeSpan = function( dayName, tsFrom, tsUntil ) {
-        // Find the active day of the week
-        for ( var i=0, len1=self.regData.openingHours.length; i<len1; i++ )
-            if ( dayName === self.regData.openingHours[ i ].dayName ) break;
-
-        // Find the active time span
-        var selectedDay = self.regData.openingHours[ i ];
-        for ( var j=0, len2=selectedDay.hours.length; j<len2; j++ )
-            if ( tsFrom === selectedDay.hours[ j ].from  &&  tsUntil === selectedDay.hours[ j ].until ) break;
-
-        // Delete the active time span
-        if ( j < len2 )
-            selectedDay.hours.splice( j, 1 );
-    };
-*/
 }]);
 
 
 app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
 
   // Data models
-    var movies = [     // Model schema
+    var movies = [     // Model schema and example
         {
             urlPoster: 'http://ia.media-imdb.com/images/M/MV5BODU4MjU4NjIwNl5BMl5BanBnXkFtZTgwMDU2MjEyMDE@._V1_SX214_AL_.jpg',
             title: 'UUUU',
@@ -106,8 +72,10 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
     var moviesYears = [];
     var moviesByDecades = {};
 
+    var favoriteMovies = [];
 
-  // Data processing methods
+
+  // Top20 initial data processing methods
     var prepareMoviesData = function( initialData ) {
         if ( initialData ) {
             movies = [];
@@ -169,10 +137,10 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
        loadData: function() {
 /*
             $http.jsonp( 'http://www.myapifilms.com/imdb/top?callback=JSON_CALLBACK&format=JSONP&start=1&end=5&data=F' )
-                     .then( function(response) { 
-									alert("Success TOP20");   return 11; 
-									//return prepareMoviesData( response.data );
-								},
+                     .then( function(response) {
+                                    alert("Success TOP20");   return 11;
+                                    //return prepareMoviesData( response.data );
+                                },
                                 function(error) { alert("Error TOP20 = " + error.status); return $q.reject( error ); }
                      );
 */
@@ -234,7 +202,59 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
 
             return ( key !== undefined? chartData : {} );
 
-        }   // end of "getChartData"
+        },   // end of "getChartData"
+
+//angular.toJson
+//angular.fromJson
+        getFavoriteMovies:  function() {
+            // Check local Storage
+            if ( window.localStorage ) {
+                var buf = localStorage.getItem( 'myFavMovies' );
+                if ( buf ) {
+                    favoriteMovies = JSON.parse( buf );
+                }
+            }
+
+            // Synchronize checkboxes
+            var len1=movies.length;
+            for ( var i=0, len=favoriteMovies.length; i<len; i++ ) {
+                for ( var k=0; k<len1; k++ ) {
+                    if ( favoriteMovies[ i ].idIMDB === movies[ k ].idIMDB )  break;
+                }
+                if ( k < len1 )  movies[ k ].favorite = true;
+            }
+
+            return favoriteMovies;
+        },
+
+        addFavoriteMovie:  function( movie ) {
+            favoriteMovies.push( angular.copy( movie ) );
+
+            if ( window.localStorage ) {
+                var buf = JSON.stringify( favoriteMovies );
+                localStorage.setItem( 'myFavMovies', buf );
+            }
+        },
+
+        removeFavoriteMovie:  function( movie ) {
+            for ( var i=0, len=favoriteMovies.length; i<len; i++ ) {
+                if ( movie.idIMDB === favoriteMovies[ i ].idIMDB )  break;
+            }
+            if ( i < len )
+                favoriteMovies.splice( i, 1 );
+
+            for ( var k=0, len1=movies.length; k<len1; k++ ) {
+                if ( movie.idIMDB === movies[ k ].idIMDB )  break;
+            }
+            if ( k < len1 )
+                movies[ k ].favorite = false;
+
+            if ( window.localStorage ) {
+                var buf = JSON.stringify( favoriteMovies );
+                localStorage.setItem( 'myFavMovies', buf );
+            }
+        },
+
 
     };   // end of "return"
 
@@ -267,6 +287,26 @@ app.directive('loading', [ function() {
     return {
                 restrict: 'A',
                 templateUrl: 'views/loading.html'
+   };
+}]);
+
+app.directive('moviesList', [ 'dataService', '$sce', function( dataService, $sce ) {
+    return {
+                restrict: 'A',
+                scope: {
+                    moviesData: '=moviesData',
+                    trailerUrl: '=trailerUrl',
+                },
+                templateUrl: 'views/movies-list.html',
+                link: function($scope, $elem, $attrs) {
+                    $scope.getTrailerURL = function( videoURL ) {
+                        var reg = /http\:\/\/www\.imdb\.com\/video\/imdb\/vi\d+/;
+                        $scope.trailerUrl = $sce.trustAsResourceUrl( videoURL.match(reg)[0] + '/imdb/embed?autoplay=true&width=480' );
+                    };
+
+                    $scope.addFavMovie = function(movie) { dataService.addFavoriteMovie( movie ) };
+                    $scope.removeFavMovie = function(movie) { dataService.removeFavoriteMovie( movie ) };
+                }
    };
 }]);
 

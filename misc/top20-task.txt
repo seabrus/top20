@@ -43,3 +43,7 @@
 
 {"countries":["USA"],"directors":[{"name":"Francis Ford Coppola","nameId":"nm0000338"}],"filmingLocations":["NY Eye and Ear Infirmary","2nd Avenue & East 13th Street","New York City","New York","USA"],"genres":["Crime","Drama"],"idIMDB":"tt0068646","languages":["English","Italian","Latin"],"metascore":"100/100","originalTitle":"","plot":"When the aging head of a famous crime family decides to transfer his position to one of his subalterns, a series of unfortunate events start happening to the family, and a war begins between all the well-known families leading to insolence, deportation, murder and revenge, and ends with the favorable successor being finally chosen.","ranking":2,"rated":"R","rating":"9.2","releaseDate":"19720324","runtime":["175 min"],"simplePlot":"The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.","title":"The Godfather","urlIMDB":"http://www.imdb.com/title/tt0068646","urlPoster":"http://ia.media-imdb.com/images/M/MV5BMjEyMjcyNDI4MF5BMl5BanBnXkFtZTcwMDA5Mzg3OA@@._V1_SX214_AL_.jpg","votes":"1,020,276","writers":[{"name":"Mario Puzo","nameId":"nm0701374"},{"name":"Francis Ford Coppola","nameId":"nm0000338"}],"year":"1972"},
 
+
+OPERA
+XMLHttpRequest to files is disabled for security reasons. Set "Allow File XMLHttpRequest" with opera:config#UserPrefs|AllowFileXMLHttpRequest to disable this security check.
+http://bioinformatics.org.au/tools/triplexator/inspector/example/ccr5/FAQs.txt

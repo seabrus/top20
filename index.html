@@ -44,147 +44,101 @@
           <ul class="nav navbar-nav">
             <li class="active"><a href="#">Home</a></li>
           </ul>
-        </div><!--/.nav-collapse -->
+        </div>
       </div>
     </nav>
 
     <div class="container theme-showcase" role="main">
 
-<!-- Main jumbotron for a primary marketing message or call to action -->
-      <div class="jumbotron">
-        <h1>Top 20 Movies</h1>
-        <p>The best movies of the last years</p>
-      </div>
+	    <!-- Main jumbotron -->
+	    <div class="jumbotron">
+	        <h1>Top 20 Movies</h1>
+	        <p>The best movies of the last years</p>
+	    </div>
+	
+	  <!-- _____   APPLICATION   _____ -->
+	    <div ng-controller="Top20Controller as ctrl">
+	
+	    <!-- INFO & Alerts block -->
+	      <!-- Top20 data loading animation  -->
+	      <div ng-if="ctrl.loadMovieStatus === 'loading' ">
+	          <div loading=""></div>
+	      </div>
+	
+	      <!-- Error alert for loading the top20 data -->
+	      <div ng-if="ctrl.loadMovieStatus === 'error' ">
+	          <div class="alert alert-warning" role="alert">
+	              <strong class="font22">&#10004;</strong> Sorry, the service is unavailable now. Please try later
+	          </div>
+	      </div>
+	
+	    <!-- Trailer loading progress -->
+	      <div ng-if="ctrl.loadTrailerStatus[0] !== -1 ">
+	          <div class="alert alert-info" role="alert">
+	              <strong class="font22">&#10004;</strong> <span class="font18">Loading trailers' Information: <b>{{ ctrl.loadTrailerStatus[0] }} %</b></span>
+	          </div>
+	      </div>
+	
+	
+ 	    <!-- Movie data (without trailer info yet) were loaded successfully -- Show Tabs -->
+	      <div ng-if="ctrl.loadMovieStatus === 'success' ">
+	
+	      <!-- Tabs selector -->
+	        <ul class="nav nav-tabs" role="tablist">
+	          <li role="presentation" class="active font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Top20' ">Top 20</a></li>
+	          <li role="presentation" class="font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Statistics' ">Statistics</a></li>
+	          <li role="presentation" class="font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Favorites' ">My Favorites</a></li>
+	        </ul>
+	
+	      <!-- Switches -->
+	        <div ng-switch="ctrl.currentTab">
+	
+		      <!-- TAB: Top20 -->
+		        <div ng-switch-when="Top20">
+		            <div movies-list movies-data="ctrl.moviesData" trailer-url="ctrl.trailerURL"></div>
+		        </div>
+	
+		      <!-- TAB: Statistics -->
+		        <div ng-switch-when="Statistics">
+		          <div ng-controller="ChartController as cc">
+		
+		            <div class="page-header">
+		                <h3>Movies by Decades</h3>
+		            </div>
+		            <div class="row">
+		              <div class="col-xs-12 font14">
+		                <div>
+		                 Select chart type:
+		                <select ng-model="cc.chartType" class="chart">
+		                    <option value="pie">pie</option>
+		                    <option value="bar">bar</option>
+		                    <option value="line">line</option>
+		                    <option value="point">point</option>
+		                    <option value="area">area</option>
+		                </select>
+		                </div>
+		                <div ac-chart="cc.chartType" ac-data="cc.chartData" ac-config="cc.chartConfig" id='chart'></div>
+		              </div>
+		            </div>
+		
+		          </div>
+		        </div>   <!--   <div ng-switch-when="Statistics">   -->
+	
+	
+		      <!-- TAB: Favorites -->
+		        <div ng-switch-when="Favorites">
+		            <div movies-list movies-data="ctrl.favMovies" trailer-url="ctrl.trailerURL"></div>
+		        </div>
 
+	        </div>   <!--   <div ng-switch="ctrl.currentTab">   -->
+	
+	      <!-- Modal window for video plugin -->
+	        <div modal-dialog modal-dialog-id="modal-trailer" trailer-url="ctrl.trailerURL"></div>
 
-<!-- ===   APPLICATION   === -->
-<!-- App controller -->
-    <div ng-controller="Top20Controller as ctrl">
-
-  <!-- Information block -->
-      <!-- Loading of the top20 data -->
-      <div ng-if="ctrl.loadMovieStatus === 'loading' ">
-          <div loading=""></div>
-      </div>
-
-      <!-- Error alert for loading the top20 data -->
-      <div ng-if="ctrl.loadMovieStatus === 'error' ">
-          <div class="alert alert-warning" role="alert">
-              <strong class="font22">&#10004;</strong> Sorry, the service is unavailable now. Please try later
-          </div>
-      </div>
-
-    <!-- Trailer info loading progress -->
-      <div ng-if="ctrl.loadTrailerStatus[0] !== -1 ">
-          <div class="alert alert-info" role="alert">
-              <strong class="font22">&#10004;</strong> <span class="font18">Loading trailers' Information: <b>{{ ctrl.loadTrailerStatus[0] }} %</b></span>
-          </div>
-      </div>
-
-
-  <!-- Movie data (without trailer info yet) were loaded successfully -->
-      <div ng-if="ctrl.loadMovieStatus === 'success' ">
-
-    <!-- Tabs selector -->
-        <ul class="nav nav-tabs" role="tablist">
-          <li role="presentation" class="active font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Top20' ">Top 20</a></li>
-          <li role="presentation" class="font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Statistics' ">Statistics</a></li>
-          <li role="presentation" class="font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Favorites' ">Favorites</a></li>
-        </ul>
-
-    <!-- Switches -->
-        <div ng-switch="ctrl.currentTab">
-
-
-    <!-- TAB: Top20 -->
-        <div ng-switch-when="Top20">
-
-            <div class="row">
-                <div class="col-xs-12 col-md-12  col-md-offset-0">
-                    <div class="table-responsive">
-                        <table class="table table-striped movies">
-                            <tbody>
-                                <tr ng-repeat="movie in ctrl.moviesData">
-                                    <td class="td1"><img ng-src="{{ movie.urlPoster }}"></td>
-                                    <td class="td2">
-                                        <b>Rank</b>: {{ movie.ranking }}<br>
-                                        <b>Title</b>: {{ movie.title }}<br>
-                                        <b>Year</b>: {{ movie.year }}<br>
-                                        <b>Rating</b>: {{ movie.rating }}<br>
-                                        <b>Genres</b>: <span ng-repeat="genre in movie.genres">{{ genre }}{{ $last ? '' : ', '}}</span><br>
-                                        <b>Countries</b>: <span ng-repeat="country in movie.countries">{{ country }}{{ $last ? '' : ', '}}</span><br>
-                                        <b>Directors</b>: <span ng-repeat="director in movie.directors"><a ng-href="{{ director.pageURL }}" target="_blank">{{ director.name }}</a>{{ $last ? '' : ', '}}</span><br>
-                                        <b>Trailers</b>:
-                                            <span ng-repeat="qlt in movie.trailer.qualities as trailers">
-                                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-trailer" ng-click="ctrl.trailerURL = ctrl.getTrailerURL(movie.trailer.videoURL)"> {{ qlt.quality }} </button>&nbsp;
-                                            </span>
-                                            <span ng-if="trailers.length === 0 && movie.trailer.videoURL">
-                                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-trailer" ng-click="ctrl.trailerURL = ctrl.getTrailerURL(movie.trailer.videoURL)"> Watch </button>
-                                            </span>
-                                            <span ng-if="trailers.length === 0 && !movie.trailer.videoURL">not available now</span>
-                                    </td>
-                                    <td class="td3">My favorite<br>
-                                        <input type="checkbox" ng-model="movie.favorite">
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>   <!--   <div class="row">   -->
-
-            <div modal-dialog modal-dialog-id="modal-trailer" trailer-url="ctrl.trailerURL"></div>
-
-        </div>   <!--   <div ng-switch-when="Top20">   -->
-
-
-    <!-- TAB: Statistics -->
-        <div ng-switch-when="Statistics">
-          <div ng-controller="ChartController as cc">
-
-            <div class="page-header">
-                <h3>Movies by Decades</h3>
-            </div>
-
-            <div class="row">
-              <div class="col-xs-12" style="font-size:14pt;">
-                <div>
-                 Select chart type:
-                <select ng-model="cc.chartType" class="chart">
-                    <option value="pie">pie</option>
-                    <option value="bar">bar</option>
-                    <option value="line">line</option>
-                    <option value="point">point</option>
-                    <option value="area">area</option>
-                </select>
-                </div>
-                <div ac-chart="cc.chartType" ac-data="cc.chartData" ac-config="cc.chartConfig" id='chart'></div>
-              </div>
-            </div>
-
-          </div>
-        </div>   <!--   <div ng-switch-when="Statistics">   -->
-
-
-    <!-- TAB: Favorites -->
-          <div ng-switch-when="Favorites">
-            <div class="page-header">
-              <h2>My favorite movies</h2>
-            </div>
-
-    <!-- Submit button
-          <div class="save-button">
-            <input type="submit" class="btn btn-success btn-lg" value="Save" ng-disabled="true">
-          </div>    -->
-
-          </div>   <!--   <div ng-switch-when="Favorites">   -->
-
-
-      </div>   <!--   <div ng-if="ctrl.loadMovieStatus = 'success' ">   -->
-
-
-    </div>   <!--   <div ng-controller="Top20Controller as ctrl">   -->
-<!-- ===   END of the application   === -->
+	      </div>   <!--   <div ng-if="ctrl.loadMovieStatus = 'success' ">   -->
+	
+	    </div>   <!--   <div ng-controller="Top20Controller as ctrl">   -->
+	  <!-- _____   END of the application   _____ -->
 
     </div> <!-- /container -->
 

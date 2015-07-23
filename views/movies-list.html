@@ -1,0 +1,34 @@
+<div class="row">
+    <div class="col-xs-12 col-md-12  col-md-offset-0">
+        <div class="table-responsive">
+            <table class="table table-striped movies">
+                <tbody>
+                    <tr ng-repeat="movie in moviesData">
+                        <td class="td1"><img ng-src="{{ movie.urlPoster }}"></td>
+                        <td class="td2">
+                            <b>Rank</b>: {{ movie.ranking }}<br>
+                            <b>Title</b>: {{ movie.title }}<br>
+                            <b>Year</b>: {{ movie.year }}<br>
+                            <b>Rating</b>: {{ movie.rating }}<br>
+                            <b>Genres</b>: <span ng-repeat="genre in movie.genres">{{ genre }}{{ $last ? '' : ', '}}</span><br>
+                            <b>Countries</b>: <span ng-repeat="country in movie.countries">{{ country }}{{ $last ? '' : ', '}}</span><br>
+                            <b>Directors</b>: <span ng-repeat="director in movie.directors"><a ng-href="{{ director.pageURL }}" target="_blank">{{ director.name }}</a>{{ $last ? '' : ', '}}</span><br>
+                            <b>Trailers</b>:
+                                <span ng-repeat="qlt in movie.trailer.qualities as trailers">
+                                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-trailer" ng-click="getTrailerURL( movie.trailer.videoURL )"> {{ qlt.quality }} </button>&nbsp;
+                                </span>
+                                <span ng-if="trailers.length === 0 && movie.trailer.videoURL">
+                                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-trailer" ng-click="getTrailerURL( movie.trailer.videoURL )"> Watch </button>
+                                </span>
+                                <span ng-if="trailers.length === 0 && !movie.trailer.videoURL">not available now</span>
+                        </td>
+                        <td class="td3">My favorite<br>
+                            <input type="checkbox" ng-model="movie.favorite" ng-click=" movie.favorite ? addFavMovie(movie) : removeFavMovie(movie) ">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>   <!--   <div class="row">   -->
+
