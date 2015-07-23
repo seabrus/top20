@@ -26,17 +26,14 @@ app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService
     self.loadMovieStatus = 'success';
     self.moviesData = dataService.loadData();
 
-
     self.loadTrailerStatus[0] = 0;
     dataService.loadTrailersData( self.loadTrailerStatus );
 
-
-
 // Trailer URL preparation
-    self.trailerURL = $sce.trustAsResourceUrl( 'http://www.imdb.com/video/imdb/vi1317709849/imdb/embed?autoplay=true&width=480' );
+    self.trailerURL = '';
     self.getTrailerURL = function( videoURL ) {
         var reg = /http\:\/\/www\.imdb\.com\/video\/imdb\/vi\d+/;
-        var url = $sce.trustAsResourceUrl( videoURL.match( reg )[0] + '/imdb/embed?autoplay=true&width=480' );
+        var url = $sce.trustAsResourceUrl( videoURL.match(reg)[0] + '/imdb/embed?autoplay=true&width=480' );
         return url;
     };
 
