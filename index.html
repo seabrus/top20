@@ -50,102 +50,97 @@
 
     <div class="container theme-showcase" role="main">
 
-	    <!-- Main jumbotron -->
-	    <div class="jumbotron">
-	        <h1>Top 20 Movies</h1>
-	        <p>The best movies of the last years</p>
-	    </div>
-	
-	  <!-- _____   APPLICATION   _____ -->
-	    <div ng-controller="Top20Controller as ctrl">
-	
-	    <!-- INFO & Alerts block -->
-	      <!-- Top20 data loading animation  -->
-	      <div ng-if="ctrl.loadMovieStatus === 'loading' ">
-	          <div loading=""></div>
-	      </div>
-	
-	      <!-- Error alert for loading the top20 data -->
-	      <div ng-if="ctrl.loadMovieStatus === 'error' ">
-	          <div class="alert alert-warning" role="alert">
-	              <strong class="font22">&#10004;</strong> Sorry, the service is unavailable now. Please try later
-	          </div>
-	      </div>
-	
-	    <!-- Trailer loading progress -->
-	      <div ng-if="ctrl.loadTrailerStatus[0] !== -1 ">
-	          <div class="alert alert-info" role="alert">
-	              <strong class="font22">&#10004;</strong> <span class="font18">Loading trailers' Information: <b>{{ ctrl.loadTrailerStatus[0] }} %</b></span>
-	          </div>
-	      </div>
-	
-	
- 	    <!-- Movie data (without trailer info yet) were loaded successfully -- Show Tabs -->
-	      <div ng-if="ctrl.loadMovieStatus === 'success' ">
-	
-	      <!-- Tabs selector -->
-	        <ul class="nav nav-tabs" role="tablist">
-	          <li role="presentation" class="active font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Top20' ">Top 20</a></li>
-	          <li role="presentation" class="font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Statistics' ">Statistics</a></li>
-	          <li role="presentation" class="font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Favorites' ">My Favorites</a></li>
-	        </ul>
-	
-	      <!-- Switches -->
-	        <div ng-switch="ctrl.currentTab">
-	
-		      <!-- TAB: Top20 -->
-		        <div ng-switch-when="Top20">
-		            <div movies-list movies-data="ctrl.moviesData" trailer-url="ctrl.trailerURL"></div>
-		        </div>
-	
-		      <!-- TAB: Statistics -->
-		        <div ng-switch-when="Statistics">
-		          <div ng-controller="ChartController as cc">
-		
-		            <div class="page-header">
-		                <h3>Movies by Decades</h3>
-		            </div>
-		            <div class="row">
-		              <div class="col-xs-12 font14">
-		                <div>
-		                 Select chart type:
-		                <select ng-model="cc.chartType" class="chart">
-		                    <option value="pie">pie</option>
-		                    <option value="bar">bar</option>
-		                    <option value="line">line</option>
-		                    <option value="point">point</option>
-		                    <option value="area">area</option>
-		                </select>
-		                </div>
-		                <div ac-chart="cc.chartType" ac-data="cc.chartData" ac-config="cc.chartConfig" id='chart'></div>
-		              </div>
-		            </div>
-		
-		          </div>
-		        </div>   <!--   <div ng-switch-when="Statistics">   -->
-	
-	
-		      <!-- TAB: Favorites -->
-		        <div ng-switch-when="Favorites">
-		            <div movies-list movies-data="ctrl.favMovies" trailer-url="ctrl.trailerURL"></div>
-		        </div>
+        <!-- Main jumbotron -->
+        <div class="jumbotron">
+            <h1>Top 20 Movies</h1>
+            <p>The best movies of the last years</p>
+        </div>
 
-	        </div>   <!--   <div ng-switch="ctrl.currentTab">   -->
-	
-	      <!-- Modal window for video plugin -->
-	        <div modal-dialog modal-dialog-id="modal-trailer" trailer-url="ctrl.trailerURL"></div>
+      <!-- _____   APPLICATION   _____ -->
+        <div ng-controller="Top20Controller as ctrl">
 
-	      </div>   <!--   <div ng-if="ctrl.loadMovieStatus = 'success' ">   -->
-	
-	    </div>   <!--   <div ng-controller="Top20Controller as ctrl">   -->
-	  <!-- _____   END of the application   _____ -->
+        <!-- INFO & Alerts block -->
+          <!-- Top20 data loading animation  -->
+          <div ng-if="ctrl.loadMovieStatus === 'loading' ">
+              <div loading=""></div>
+          </div>
+
+          <!-- Error alert for loading the top20 data -->
+          <div ng-if="ctrl.loadMovieStatus === 'error' ">
+              <div class="alert alert-warning" role="alert">
+                  <strong class="font22">&#10004;</strong> Sorry, the service is unavailable now. Please try later
+              </div>
+          </div>
+
+        <!-- Trailer loading progress -->
+          <div ng-if="ctrl.loadTrailerStatus[0] !== -1 ">
+              <div class="alert alert-info" role="alert">
+                  <strong class="font22">&#10004;</strong> <span class="font18">Loading trailers' Information: <b>{{ ctrl.loadTrailerStatus[0] }} %</b></span>
+              </div>
+          </div>
+
+
+        <!-- Movie data (without trailer info yet) were loaded successfully -- Show Tabs -->
+          <div ng-if="ctrl.loadMovieStatus === 'success' ">
+
+          <!-- Tabs selector -->
+            <ul class="nav nav-tabs" role="tablist">
+              <li role="presentation" class="active font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Top20' ">Top 20</a></li>
+              <li role="presentation" class="font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Statistics' ">Statistics</a></li>
+              <li role="presentation" class="font22"><a href="" data-toggle="tab" ng-click="ctrl.currentTab='Favorites' ">My Favorites</a></li>
+            </ul>
+
+          <!-- Switches -->
+            <div ng-switch="ctrl.currentTab">
+
+              <!-- TAB: Top20 -->
+                <div ng-switch-when="Top20">
+                    <div movies-list movies-data="ctrl.moviesData" trailer-url="ctrl.trailerURL"></div>
+                </div>
+
+              <!-- TAB: Statistics -->
+                <div ng-switch-when="Statistics">
+                  <div ng-controller="ChartController as cc">
+
+                    <div class="page-header">
+                        <h3>Movies by Decades</h3>
+                    </div>
+                    <div class="row">
+                      <div class="col-xs-12 font14">
+                        <div>Select chart type:
+                            <select ng-model="cc.chartType" class="chart">
+                                <option value="pie">pie</option><option value="bar">bar</option>
+                                <option value="line">line</option><option value="area">area</option>
+                            </select>
+                        </div>
+                        <div ac-chart="cc.chartType" ac-data="cc.chartData" ac-config="cc.chartConfig" id='chart'></div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>   <!--   <div ng-switch-when="Statistics">   -->
+
+
+              <!-- TAB: Favorites -->
+                <div ng-switch-when="Favorites">
+                    <div movies-list movies-data="ctrl.favMovies" trailer-url="ctrl.trailerURL"></div>
+                </div>
+
+            </div>   <!--   <div ng-switch="ctrl.currentTab">   -->
+
+          <!-- Modal window for video plugin -->
+            <div modal-dialog modal-dialog-id="modal-trailer" trailer-url="ctrl.trailerURL"></div>
+
+          </div>   <!--   <div ng-if="ctrl.loadMovieStatus = 'success' ">   -->
+
+        </div>   <!--   <div ng-controller="Top20Controller as ctrl">   -->
+      <!-- _____   END of the application   _____ -->
 
     </div> <!-- /container -->
 
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
+
+    <!-- ================================================== -->
     <script src="vendors/jquery/jquery.min.js"></script>
     <script src="vendors/bootstrap/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->

@@ -1,55 +1,80 @@
 var app = angular.module('testTop20', [ 'angularCharts' ]);
 
-
-app.controller('Top20Controller', [ 'dataService', '$sce', function( dataService, $sce ) {
+// ======================================
+//     CONTROLLERS
+// ======================================
+app.controller('Top20Controller', [ 'dataService', function( dataService ) {
     var self = this;
 
-// Loading status and Tabs initialization
+ // Loading status and Tabs initialization
     self.loadTrailerStatus = [ -1 ];
     self.loadMovieStatus = 'loading';   // can be equal to 'loading' or 'success' or 'error'
     self.currentTab = 'Top20';
 
-// Application data loading
+ // Application data loading
     self.moviesData = [];
-/*
+ /*
+    //   >>>   This code should be used when the request to  http://www.myapifilms.com/imdb/top?callback=JSON_CALLBACK
+    //   >>>   will be fixed on the service website
+
     dataService.loadData().then(
         function( movies ) {
-            self.loadMovieStatus = 'success';
             self.moviesData = movies;
+            self.loadMovieStatus = 'success';
         },
         function( err ) {
             self.loadMovieStatus = 'error';
             console.log('Error when getting movie data');
         }
     );
-*/
+ */
+    //   >>>   Workaround for the http://www.myapifilms.com/imdb/top?callback=JSON_CALLBACK bug
     self.moviesData = dataService.loadData();
     self.loadMovieStatus = 'success';
 
 
-// Favorite movies
+ // Loading Favorite movies from localStorage, if present
     self.favMovies = [];
     self.favMovies = dataService.getFavoriteMovies();
 
+ // Trailer URL for use in the video plugin
+    self.trailerURL = '';
 
-// Loading trailers' information
+ // Loading trailers' information
     self.loadTrailerStatus[0] = 0;
     dataService.loadTrailersData( self.loadTrailerStatus );
 
+}]);
 
-// Trailer URL for use in the video plugin
-    self.trailerURL = '';
+app.controller('ChartController', [ 'dataService', function( dataService ) {
+    var self = this;
 
+    self.chartType = 'pie';
+    self.chartData = dataService.getChartData();
+    self.chartConfig = {
+        labels: true,
+        title: "",
+        legend: {
+            display: true,
+            position: 'left'
+        },
+        innerRadius: 50,
+        lineLegend: 'traditional'
+    };
 }]);
 
 
+
+// ======================================
+//     SERVICES: Data service
+// ======================================
 app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
 
   // Data models
     var movies = [     // Model schema and example
         {
             urlPoster: 'http://ia.media-imdb.com/images/M/MV5BODU4MjU4NjIwNl5BMl5BanBnXkFtZTgwMDU2MjEyMDE@._V1_SX214_AL_.jpg',
-            title: 'UUUU',
+            title: 'UUU',
             year: '1999',
             rating: '9.3',
             genres: ['Drama', 'Basic'],
@@ -70,12 +95,10 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
     ];
 
     var moviesYears = [];
-    var moviesByDecades = {};
-
     var favoriteMovies = [];
 
 
-  // Top20 initial data processing methods
+  // Top20 initial data processing method
     var prepareMoviesData = function( initialData ) {
         if ( initialData ) {
             movies = [];
@@ -117,16 +140,6 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
             }   // end of the main "for" loop
         }       // end of "if"
 
-
-        // Movies by decades
-        moviesYears.sort();
-        for ( var k=0, len=moviesYears.length, decade=''; k<len; k++ ) {
-            if ( moviesYears[ k ].length === 4 ) {
-                decade = moviesYears[ k ].slice(0, 3);
-                moviesByDecades[ decade ] = moviesByDecades[ decade ] ? (moviesByDecades[ decade ] + 1) : 1;
-            }
-        }
-
         initialData = null;
 
         return movies;
@@ -138,8 +151,8 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
 /*
             $http.jsonp( 'http://www.myapifilms.com/imdb/top?callback=JSON_CALLBACK&format=JSONP&start=1&end=5&data=F' )
                      .then( function(response) {
-                                    alert("Success TOP20");   return 11;
-                                    //return prepareMoviesData( response.data );
+                                    //alert("Success TOP20");   return 11;
+                                    return prepareMoviesData( response.data );
                                 },
                                 function(error) { alert("Error TOP20 = " + error.status); return $q.reject( error ); }
                      );
@@ -167,9 +180,9 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
                      )
                     .then( function(response) { return true; },
                               function(error) {
-                                  var str = 'Error: ';
+                                  var str = '';
                                   for (var key in error)  str += (key + ' = ' + error[ key ] + ', ');
-                                  alert("Trailer loading = " + str);
+                                  console.log("Trailer n=" + n + " loading error: " + str);
                                   return $q.reject( error );
                               }
                     )
@@ -185,7 +198,18 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
         },   // end of "loadTrailersData"
 
 
+      //   >>> CHART data preparation
         getChartData:  function() {
+            var moviesByDecades = {};
+
+            moviesYears.sort();
+            for ( var k=0, len=moviesYears.length, decade=''; k<len; k++ ) {
+                if ( moviesYears[ k ].length === 4 ) {
+                    decade = moviesYears[ k ].slice(0, 3);
+                    moviesByDecades[ decade ] = moviesByDecades[ decade ] ? (moviesByDecades[ decade ] + 1) : 1;
+                }
+            }
+
             var chartData = {};
             chartData.series = [];
             chartData.data = [];
@@ -204,14 +228,14 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
 
         },   // end of "getChartData"
 
-//angular.toJson
-//angular.fromJson
+
+      //   >>> Favorite Movies
         getFavoriteMovies:  function() {
             // Check local Storage
             if ( window.localStorage ) {
                 var buf = localStorage.getItem( 'myFavMovies' );
                 if ( buf ) {
-                    favoriteMovies = JSON.parse( buf );
+                    favoriteMovies = angular.fromJson( buf );
                 }
             }
 
@@ -231,50 +255,34 @@ app.factory('dataService', [ '$http', '$q', function( $http, $q ) {
             favoriteMovies.push( angular.copy( movie ) );
 
             if ( window.localStorage ) {
-                var buf = JSON.stringify( favoriteMovies );
+                var buf = angular.toJson( favoriteMovies );
                 localStorage.setItem( 'myFavMovies', buf );
             }
         },
 
         removeFavoriteMovie:  function( movie ) {
+            // Remove a fav movie
             for ( var i=0, len=favoriteMovies.length; i<len; i++ ) {
                 if ( movie.idIMDB === favoriteMovies[ i ].idIMDB )  break;
             }
             if ( i < len )
                 favoriteMovies.splice( i, 1 );
 
+            // Reset the checkbox
             for ( var k=0, len1=movies.length; k<len1; k++ ) {
                 if ( movie.idIMDB === movies[ k ].idIMDB )  break;
             }
             if ( k < len1 )
                 movies[ k ].favorite = false;
 
+            // Save a local copy of the fav movies list
             if ( window.localStorage ) {
-                var buf = JSON.stringify( favoriteMovies );
+                var buf = angular.toJson( favoriteMovies );
                 localStorage.setItem( 'myFavMovies', buf );
             }
         },
 
-
     };   // end of "return"
-
-}]);
-
-app.controller('ChartController', [ 'dataService', function( dataService ) {
-    var self = this;
-
-    self.chartType = 'pie';
-    self.chartData = dataService.getChartData();
-    self.chartConfig = {
-        labels: true,
-        title: "",
-        legend: {
-            display: true,
-            position: 'left'
-        },
-        innerRadius: 50,
-        lineLegend: 'traditional'
-    };
 }]);
 
 
@@ -282,7 +290,6 @@ app.controller('ChartController', [ 'dataService', function( dataService ) {
 // ======================================
 //     DIRECTIVES
 // ======================================
-
 app.directive('loading', [ function() {
     return {
                 restrict: 'A',
@@ -319,40 +326,7 @@ app.directive('modalDialog', [ function() {
                 },
                 templateUrl: 'views/modal-dialog.html',
                 link: function($scope, $elem, $attrs) {
-                    //
+                    // ...
                 }
    };
 }]);
-
-
-
-
-/*
-app.factory('loadingInterceptor', ['$q', function($q) {
-    return {
-        request: function(config) {
-            console.log('Request made with ', config);
-            return config;
-        },
-
-        requestError: function(rejection) {
-            console.log('Request error due to ', rejection);
-            return $q.reject(rejection);
-        },
-
-        response: function(response) {
-            console.log('Response from server ', response);
-            return response || $q.when(response);     // Return a promise
-        },
-
-        responseError: function(rejection) {
-            console.log('Error in response ', rejection);
-            return $q.reject(rejection);
-        }
-    };
-}]);
-
-app.config(['$httpProvider', function($httpProvider) {
-    $httpProvider.interceptors.push('loadingInterceptor');
-}]);
-*/
